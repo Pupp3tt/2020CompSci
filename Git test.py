@@ -2,7 +2,7 @@ def function1():
     print "We suck"
 
 def function2():
-    pass
+    print 'U SUCK'
 
 def function3():
     print "Don't make me break your Nico Nico Neecaps"
