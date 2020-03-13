@@ -17,7 +17,7 @@ skip()
 ################
 
 def function1():
-    pass
+    print 'U SUCK'
 
 def function2():
     pass
