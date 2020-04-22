@@ -1,29 +1,11 @@
-
-def type():
-    pass
-    # type of operations
-
-def fly():
-    pass
-    # How to do
-
-def skip():
-    pass
-    # why we skiping
-
-type()
-fly()
-skip()
-################
-
 def function1():
-    pass
+    print "We suck"
 
 def function2():
-    pass
+    print 'U SUCK'
 
 def function3():
-    pass
+    print "Don't make me break your Nico Nico Neecaps"
 
 function1()
 function2()
