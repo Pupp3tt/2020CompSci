@@ -219,6 +219,57 @@ while run:
             player.isJump = False
             player.jumpCount = 10
 
+#########################################################            
+
+class Weapons(object):
+    pass
+
+class Proj_Weapons(Weapons):
+    def __init__(self, parent):
+        Weapons.__init__(self, parent)
+    pass
+        
+class Gun(Proj_Weapons):
+    def __init__(self, parent):
+        Proj_Weapons.__init__(self, parent)
+    pass
+
+class Bow(Proj_Weapons):
+    def __init__(self,parent):
+        Proj_Weapons.__init__(self, parent)
+    pass
+
+
+class Combat_Weapons(Weapons):
+    def __init__(self, parent):
+        Weapons.__init__(self, parent)
+
+class Sword(Combat_Weapons):
+    def __init__(self, parent):
+        Combat_Weapons.__init__(self, parent)
+    pass
+
+class Spear(Combat_Weapons):
+    def __init__(self, parent):
+        Combat_Weapons.__init__(self, parent)
+    pass
+
+
+###############################################
+
+class Materials(object):
+    pass
+
+class food(Materials):
+    def __init__(self, parent):
+        Materials.__init__(self, parent)
+    pass
+
+class drinks(Materials):
+    def __init__(self, parent):
+        Materials.__init__(self, parent)
+    pass
+
     redrawGameWindow()
 
 pygame.quit()
