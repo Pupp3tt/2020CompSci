@@ -1,14 +1,17 @@
 import pygame
 pygame.init()
 
-screen = pygame.display.set_mode((500, 480))
+screen = pygame.display.set_mode((852, 480))
 pygame.display.set_caption("First Game")
 clock = pygame.time.Clock()
-score = 0
 walkRight = [pygame.image.load('Sprites/R1.png'), pygame.image.load('Sprites/R2.png'), pygame.image.load('Sprites/R3.png'), pygame.image.load('Sprites/R4.png'), pygame.image.load('Sprites/R5.png'), pygame.image.load('Sprites/R6.png'), pygame.image.load('Sprites/R7.png'), pygame.image.load('Sprites/R8.png'), pygame.image.load('Sprites/R9.png')]
 walkLeft = [pygame.image.load('Sprites/L1.png'), pygame.image.load('Sprites/L2.png'), pygame.image.load('Sprites/L3.png'), pygame.image.load('Sprites/L4.png'), pygame.image.load('Sprites/L5.png'), pygame.image.load('Sprites/L6.png'), pygame.image.load('Sprites/L7.png'), pygame.image.load('Sprites/L8.png'), pygame.image.load('Sprites/L9.png')]
 bg = pygame.image.load('Sprites/bg.jpg')
 char = pygame.image.load('Sprites/standing.png')
+YELLOW = (255, 255, 0)
+BLACK = (0, 0, 0)
+BROWN = (165, 42, 42)
+
 
 class Player(object):
     def __init__(self, x, y, width, height):
@@ -24,42 +27,66 @@ class Player(object):
         self.walkCount = 0
         self.standing = True
         self.hitbox = (self.x + 17, self.y + 11, 29, 52)
+        self.currentWeapon = 'Gun'
+        self.health = 100
+        self.hit_counter = 0
+        self.visible = True
 
     def draw(self, screen):
-        if self.walkCount + 1 >= 27:
-            self.walkCount = 0
-        if not (self.standing):
-            if self.left:
-                screen.blit(walkLeft[self.walkCount // 3], (self.x, self.y))
-                self.walkCount += 1
-            elif self.right:
-                screen.blit(walkRight[self.walkCount // 3], (self.x, self.y))
-                self.walkCount += 1
-        else:
-            if self.right:
-                screen.blit(walkRight[0], (self.x, self.y))
+        if self.visible:
+            if self.walkCount + 1 >= 27:
+                self.walkCount = 0
+            if not (self.standing):
+                if self.left:
+                    screen.blit(walkLeft[self.walkCount // 3], (self.x, self.y))
+                    self.walkCount += 1
+                elif self.right:
+                    screen.blit(walkRight[self.walkCount // 3], (self.x, self.y))
+                    self.walkCount += 1
             else:
-                screen.blit(walkLeft[0], (self.x, self.y))
-        self.hitbox = (self.x + 17, self.y + 11, 29, 52)
+                if self.right:
+                    screen.blit(walkRight[0], (self.x, self.y))
+                else:
+                    screen.blit(walkLeft[0], (self.x, self.y))
+            self.hitbox = (self.x + 17, self.y + 11, 29, 52)
+            pygame.draw.rect(screen, (255, 0, 0), (10, 10, 300, 20))
+            pygame.draw.rect(screen, (0, 128, 0), (10, 10, 50 - (3 * (16 - self.health)), 20))
 
     def hit(self):
         self.isJump = False
         self.jumpCount = 10
-        self.x = 60
+        if goblin.x > self.x:
+            self.x = self.x - 35
+        else:
+            self.x = self.x + 35
         self.y = 410
         self.walkCount = 0
-        font1 = pygame.font.SysFont('comicsans', 100)
-        text = font1.render('-5', 1, (255, 0, 0))
-        screen.blit(text, (250 - (text.get_width() / 2), 200))
-        pygame.display.update()
-        i = 0
-        while i < 300:
-            pygame.time.delay(10)
-            i += 1
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    i = 301
-                    pygame.quit()
+        if self.health > 0:
+            self.health -= goblin.dmg
+            self.hit_counter = self.hit_counter + 1
+            if self.hit_counter > 9:
+                self.visible = False
+                self.x = 280
+                self.y = 280
+                self.isJump = True
+
+    def die(self):
+        font = pygame.font.SysFont("impact", 60)
+        text = font.render("GAME OVER", 1, (0, 0, 0))
+        if self.visible == False:
+            screen.blit(text, (440 - (text.get_width() / 2), 60))
+
+    def checkWep(self):
+        keys_weapons = pygame.key.get_pressed()
+
+        if keys_weapons[pygame.K_1]:
+            self.currentWeapon = 'Gun'
+        elif keys_weapons[pygame.K_2]:
+            self.currentWeapon = 'Bow'
+        elif keys_weapons[pygame.K_3]:
+            self.currentWeapon = 'Sword'
+        elif keys_weapons[pygame.K_4]:
+            self.currentWeapon = 'Spear'
 
 class Enemy(object):
     walkRight = [pygame.image.load('Sprites/R1E.png'), pygame.image.load('Sprites/R2E.png'), pygame.image.load('Sprites/R3E.png'), pygame.image.load('Sprites/R4E.png'), pygame.image.load('Sprites/R5E.png'), pygame.image.load('Sprites/R6E.png'), pygame.image.load('Sprites/R7E.png'), pygame.image.load('Sprites/R8E.png'), pygame.image.load('Sprites/R9E.png'), pygame.image.load('Sprites/R10E.png'), pygame.image.load('Sprites/R11E.png')]
@@ -74,10 +101,11 @@ class Enemy(object):
         self.end = end
         self.path = [self.x, self.end]
         self.walkCount = 0
-        self.vel = 3
+        self.vel = 1
         self.hitbox = (self.x+17, self.y + 2, 31, 57)
         self.health = 10
         self.visible = True
+        self.dmg = 10
 
     def draw(self, screen):
         self.move()
@@ -114,87 +142,125 @@ class Enemy(object):
             self.health -= 1
         else:
             self.visible = False
-        print 'hit'
 
 class Projectile(object):
     def __init__(self, x, y, radius, color, facing):
         self.x = x
         self.y = y
+        self.width = 25
+        self.height = 3
         self.radius = radius
         self.color = color
         self.facing = facing
         self.vel = 8 * facing
 
     def draw(self, screen):
-        pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), int(self.radius))
+        if player.currentWeapon == 'Gun':
+            pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), int(self.radius))
+        elif player.currentWeapon == 'Bow':
+            pygame.draw.rect(screen, self.color, (int(self.x), int(self.y), int(self.width), int(self.height)))
+
+##########################################################################
+
+class Materials(object):
+    pass
+
+
+class food(Materials):
+    def __init__(self):
+        Materials.__init__(self)
+
+    pass
+
+
+class drinks(Materials):
+    def __init__(self):
+        Materials.__init__(self)
+
+    pass
 
 def redrawGameWindow():
     screen.blit(bg, (0,0))
-    text = font.render('Score: {}'.format(score), 1, (0,0,0))
-    screen.blit(text, (390, 10))
+    if player.visible == False:
+        player.die()
     player.draw(screen)
+    player.checkWep()
     goblin.draw(screen)
-    for bullet in bullets:
-        bullet.draw(screen)
+    for projectile in projectiles:
+        projectile.draw(screen)
     pygame.display.update()
 
-font = pygame.font.SysFont('comicsans', 30, True)
 player = Player(300, 410, 64, 64)
 goblin = Enemy(100, 410, 64, 64, 450)
-bullets = []
+projectiles = []
 shootLoop = 0 #cool down for shots
 run = True
+
 while run:
     clock.tick(27)
+
+    keys = pygame.key.get_pressed()
 
     if goblin.visible == True:
         if player.hitbox[1] < goblin.hitbox[1] + goblin.hitbox[3] and player.hitbox[1] + player.hitbox[3] > goblin.hitbox[1]:
             if player.hitbox[0] + player.hitbox[2] > goblin.hitbox[0] and player.hitbox[0] < goblin.hitbox[0] + goblin.hitbox[2]:
-                score -= 5
                 player.hit()
 
     if shootLoop > 0:
         shootLoop += 1
-    if shootLoop > 3:
-        shootLoop = 0
+    if player.currentWeapon == 'Gun':
+        if shootLoop > 10:
+            shootLoop = 0
+    elif player.currentWeapon == 'Bow':
+        if shootLoop > 20:
+            shootLoop = 0
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
-    if goblin.visible == True:
-        for bullet in bullets: #projectile
-            if bullet.y - bullet.radius < goblin.hitbox[1] + goblin.hitbox[3] and bullet.y + bullet.radius > goblin.hitbox[1]:
-                if bullet.x + bullet.radius > goblin.hitbox[0] and bullet.x - bullet.radius < goblin.hitbox[0] + goblin.hitbox[2]:
-                    goblin.hit()
-                    score += 1
-                    bullets.pop(bullets.index(bullet))
-            if bullet.x < 500 and bullet.x > 0:
-                bullet.x += bullet.vel
-            else:
-                bullets.pop(bullets.index(bullet))
-    if goblin.visible == False:
-        for bullet in bullets:
-            if bullet.x < 500 and bullet.x > 0:
-                bullet.x += bullet.vel
-            else:
-                bullets.pop(bullets.index(bullet))
 
-    keys = pygame.key.get_pressed()
+
+    if goblin.visible == True:
+        for projectile in projectiles: #projectile
+            if projectile.y - projectile.radius < goblin.hitbox[1] + goblin.hitbox[3] and projectile.y + projectile.radius > goblin.hitbox[1]:
+                if projectile.x + projectile.radius > goblin.hitbox[0] and projectile.x - projectile.radius < goblin.hitbox[0] + goblin.hitbox[2]:
+                    goblin.hit()
+                    projectiles.pop(projectiles.index(projectile))
+            if projectile.x < 852 and projectile.x > 0:
+                if player.currentWeapon == 'Gun':
+                    projectile.x += projectile.vel * 2
+                elif player.currentWeapon == 'Bow':
+                    projectile.x += projectile.vel
+            else:
+                projectiles.pop(projectiles.index(projectile))
+    if goblin.visible == False:
+        for projectile in projectiles:
+            if projectile.x < 852 and projectile.x > 0:
+                if player.currentWeapon == 'Gun':
+                    projectile.x += projectile.vel * 2
+                elif player.currentWeapon == 'Bow':
+                    projectile.x += projectile.vel
+            else:
+                projectiles.pop(projectiles.index(projectile))
+
 
     if keys[pygame.K_SPACE] and shootLoop == 0:
         if player.left:
             facing = -1
         else:
             facing = 1
-        if len(bullets) < 5:
-            bullets.append(Projectile(round(player.x + player.width // 2), round(player.y + player.height // 2),  6, (0,0,0), facing))
+        if len(projectiles) < 5:
+            if player.currentWeapon == 'Gun':
+                projectiles.append(Projectile(round(player.x + player.width // 2), round(player.y + player.height // 2),  2, (255,255,0), facing))
+            elif player.currentWeapon == 'Bow':
+                projectiles.append(Projectile(round(player.x + player.width // 2), round(player.y + player.height // 2), 4, (162, 42, 42), facing))
         shootLoop = 1
     if keys[pygame.K_a] and player.x > player.vel: # left
         player.x -= player.vel
         player.left = True
         player.right = False
         player.standing = False
-    elif keys[pygame.K_d] and player.x < 500 - player.width - player.vel: #right
+    elif keys[pygame.K_d] and player.x < 865 - player.width - player.vel: #right
         player.x += player.vel
         player.left = False
         player.right = True
@@ -218,57 +284,6 @@ while run:
         else:
             player.isJump = False
             player.jumpCount = 10
-
-#########################################################            
-
-class Weapons(object):
-    pass
-
-class Proj_Weapons(Weapons):
-    def __init__(self, parent):
-        Weapons.__init__(self, parent)
-    pass
-        
-class Gun(Proj_Weapons):
-    def __init__(self, parent):
-        Proj_Weapons.__init__(self, parent)
-    pass
-
-class Bow(Proj_Weapons):
-    def __init__(self,parent):
-        Proj_Weapons.__init__(self, parent)
-    pass
-
-
-class Combat_Weapons(Weapons):
-    def __init__(self, parent):
-        Weapons.__init__(self, parent)
-
-class Sword(Combat_Weapons):
-    def __init__(self, parent):
-        Combat_Weapons.__init__(self, parent)
-    pass
-
-class Spear(Combat_Weapons):
-    def __init__(self, parent):
-        Combat_Weapons.__init__(self, parent)
-    pass
-
-
-###############################################
-
-class Materials(object):
-    pass
-
-class food(Materials):
-    def __init__(self, parent):
-        Materials.__init__(self, parent)
-    pass
-
-class drinks(Materials):
-    def __init__(self, parent):
-        Materials.__init__(self, parent)
-    pass
 
     redrawGameWindow()
 
