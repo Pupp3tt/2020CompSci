@@ -106,14 +106,14 @@ while True:
 
     #joystick left
     if (vrx2_pos > 535):
-        # move player right
+        # move crosshair right
         print ("move right")
     if (vrx2_pos < 530):
-        # move player left
+        # move crosshair left
         print ("move left")
     if (vry2_pos > 535):
-        # move player right
+        # move crosshair up
         print ("move up")
     if (vry2_pos < 520):
-        # move player left
+        # move crosshair down
         print ("move down")
