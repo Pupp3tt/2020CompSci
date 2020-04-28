@@ -57,39 +57,39 @@ def leftJoystick():
     swt2_val = ReadChannel(swt_channel)
     return vrx2_pos, vry2_pos, swt2_val  # Return x,y,and pressed postion
 
-def checkRight(button):
-    if (button == 18 and True):
+def checkRight(i):
+    if (i == 0):
+        print "Yellow" # up
+    if (i == 1):
+        print "Gray" # bumper
+    if (i == 2):
+        print "Green" # down
+    if (i == 3):
+        print "Blue" # left
+    if (i == 4):
+        print "Red" # Right
+    if (i == 5):
+        print "White" # Triger
+
+def checkLeft(i):
+    if (i == 6):
         print "Yellow"
-    if (button == 19 and True):
+    if (i == 7):
         print "Gray"
-    if (button == 20 and True):
+    if (i == 8):
         print "Green"
-    if (button == 21 and True):
+    if (i == 9):
         print "Blue"
-    if (button == 22 and True):
+    if (i == 10):
         print "Red"
-    if (button == 23 and True):
+    if (i == 11):
         print "White"
 
-def checkLeft(button):
-    if (button == 24 and True):
-        pass
-    if (button == 25 and True):
-        pass
-    if (button == 26 and True):
-        pass
-    if (button == 27 and True):
-        pass
-    if (button == 12 and True):
-        pass
-    if (button == 16 and True):
-        pass
-
 while True:
-    for button in len(buttons):
-
-        if (button == 23 and True):
-            pass
-            # ESC
-        checkRight(button)
-        checkLeft(button)
+    for i in range(len(buttons)):# Check all buttons
+        if (GPIO.input(buttons[i]) == True): # If one is press find that button
+            if (i == 12): # If ESC then do this
+                pass
+                # ESC
+            checkRight(i) # If on right then do that
+            checkLeft(i) # If on left the do that
