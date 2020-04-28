@@ -59,37 +59,37 @@ def leftJoystick():
 
 def checkRight(i):
     if (i == 0):
-        print "Yellow" # up
+        print ("Yellow") # up
     if (i == 1):
-        print "Gray" # bumper
+        print ("Gray") # bumper
     if (i == 2):
-        print "Green" # down
+        print ("Green") # down
     if (i == 3):
-        print "Blue" # left
+        print ("Blue") # left
     if (i == 4):
-        print "Red" # Right
+        print ("Red") # Right
     if (i == 5):
-        print "White" # Triger
+        print ("White") # Triger
 
 def checkLeft(i):
     if (i == 6):
-        print "Yellow"
+        print ("Yellow")
     if (i == 7):
-        print "Gray"
+        print ("Gray")
     if (i == 8):
-        print "Green"
+        print ("Green")
     if (i == 9):
-        print "Blue"
+        print ("Blue")
     if (i == 10):
-        print "Red"
+        print ("Red")
     if (i == 11):
-        print "White"
+        print ("White")
 
 while True:
     for i in range(len(buttons)):# Check all buttons
         if (GPIO.input(buttons[i]) == True): # If one is press find that button
             if (i == 12): # If ESC then do this
-                pass
+                print ("black")
                 # ESC
             checkRight(i) # If on right then do that
             checkLeft(i) # If on left the do that
