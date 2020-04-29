@@ -129,3 +129,4 @@ while True:
     movePlayer()
     # joystick left
     # moveCrossHair()
+    time.sleep(0.5)
