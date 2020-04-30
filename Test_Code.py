@@ -1,17 +1,17 @@
 import pygame
 pygame.init()
+pygame.joystick.init()
 
 screen = pygame.display.set_mode((852, 480))
 pygame.display.set_caption("First Game")
 clock = pygame.time.Clock()
 walkRight = [pygame.image.load('Sprites/R1.png'), pygame.image.load('Sprites/R2.png'), pygame.image.load('Sprites/R3.png'), pygame.image.load('Sprites/R4.png'), pygame.image.load('Sprites/R5.png'), pygame.image.load('Sprites/R6.png'), pygame.image.load('Sprites/R7.png'), pygame.image.load('Sprites/R8.png'), pygame.image.load('Sprites/R9.png')]
 walkLeft = [pygame.image.load('Sprites/L1.png'), pygame.image.load('Sprites/L2.png'), pygame.image.load('Sprites/L3.png'), pygame.image.load('Sprites/L4.png'), pygame.image.load('Sprites/L5.png'), pygame.image.load('Sprites/L6.png'), pygame.image.load('Sprites/L7.png'), pygame.image.load('Sprites/L8.png'), pygame.image.load('Sprites/L9.png')]
-bg = pygame.image.load('Sprites/bg.jpg')
+bg = pygame.image.load('ArtWork/background.png')
 char = pygame.image.load('Sprites/standing.png')
 YELLOW = (255, 255, 0)
 BLACK = (0, 0, 0)
 BROWN = (165, 42, 42)
-
 
 class Player(object):
     def __init__(self, x, y, width, height):
@@ -31,6 +31,7 @@ class Player(object):
         self.health = 100
         self.hit_counter = 0
         self.visible = True
+        self.weapon_slot = 0
 
     def draw(self, screen):
         if self.visible:
@@ -50,7 +51,7 @@ class Player(object):
                     screen.blit(walkLeft[0], (self.x, self.y))
             self.hitbox = (self.x + 17, self.y + 11, 29, 52)
             pygame.draw.rect(screen, (255, 0, 0), (10, 10, 300, 20))
-            pygame.draw.rect(screen, (0, 128, 0), (10, 10, 50 - (3 * (16 - self.health)), 20))
+            pygame.draw.rect(screen, (0, 128, 0), (10, 10, 50 - (3 * (16 - self.health)), 20)) # Player's good health
 
     def hit(self):
         self.isJump = False
@@ -63,7 +64,7 @@ class Player(object):
         self.walkCount = 0
         if self.health > 0:
             self.health -= goblin.dmg
-            self.hit_counter = self.hit_counter + 1
+            self.hit_counter = self.hit_counter + 1  # This is the player's hit counter, if is higher than 9 player dies. Food decreases counter.
             if self.hit_counter > 9:
                 self.visible = False
                 self.x = 280
@@ -77,15 +78,15 @@ class Player(object):
             screen.blit(text, (440 - (text.get_width() / 2), 60))
 
     def checkWep(self):
-        keys_weapons = pygame.key.get_pressed()
+        self.weapon_slot += 1
+        if self.weapon_slot > 2:
+            self.weapon_slot = 0
 
-        if keys_weapons[pygame.K_1]:
+        if self.weapon_slot == 0:
             self.currentWeapon = 'Gun'
-        elif keys_weapons[pygame.K_2]:
+        elif self.weapon_slot == 1:
             self.currentWeapon = 'Bow'
-        elif keys_weapons[pygame.K_3]:
-            self.currentWeapon = 'Sword'
-        elif keys_weapons[pygame.K_4]:
+        elif self.weapon_slot == 2:
             self.currentWeapon = 'Spear'
 
 class Enemy(object):
@@ -99,13 +100,13 @@ class Enemy(object):
         self.width = width
         self.height = height
         self.end = end
-        self.path = [self.x, self.end]
         self.walkCount = 0
         self.vel = 1
         self.hitbox = (self.x+17, self.y + 2, 31, 57)
         self.health = 10
-        self.visible = True
+        self.visible = False
         self.dmg = 10
+        self.life = True
 
     def draw(self, screen):
         self.move()
@@ -143,6 +144,15 @@ class Enemy(object):
         else:
             self.visible = False
 
+    def spawn(self):
+        self.life = True
+        if self.life == True:
+            self.move()
+            self.draw(screen)
+        elif self.life == False:
+            self.spawn()
+
+
 class Projectile(object):
     def __init__(self, x, y, radius, color, facing):
         self.x = x
@@ -157,7 +167,7 @@ class Projectile(object):
     def draw(self, screen):
         if player.currentWeapon == 'Gun':
             pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), int(self.radius))
-        elif player.currentWeapon == 'Bow':
+        elif player.currentWeapon == 'Bow' or player.currentWeapon == 'Spear':
             pygame.draw.rect(screen, self.color, (int(self.x), int(self.y), int(self.width), int(self.height)))
 
 ##########################################################################
@@ -184,16 +194,17 @@ def redrawGameWindow():
     if player.visible == False:
         player.die()
     player.draw(screen)
-    player.checkWep()
-    goblin.draw(screen)
     for projectile in projectiles:
         projectile.draw(screen)
+    for goblin in goblins:
+        goblin.spawn()
     pygame.display.update()
 
 player = Player(300, 410, 64, 64)
 goblin = Enemy(100, 410, 64, 64, 450)
 projectiles = []
-shootLoop = 0 #cool down for shots
+goblins = []
+shootLoop = 0
 run = True
 
 while run:
@@ -214,10 +225,16 @@ while run:
     elif player.currentWeapon == 'Bow':
         if shootLoop > 20:
             shootLoop = 0
+    elif player.currentWeapon == 'Spear':
+        if shootLoop > 10:
+            shootLoop = 0
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_c:
+                player.checkWep()
 
 
     if goblin.visible == True:
@@ -231,17 +248,45 @@ while run:
                     projectile.x += projectile.vel * 2
                 elif player.currentWeapon == 'Bow':
                     projectile.x += projectile.vel
+                elif player.currentWeapon == 'Spear':
+                    projectile.x += projectile.vel
+                    try:
+                        if projectile.x > player.x + 48:
+                            projectiles.pop(projectiles.index(projectile))
+                        if projectile.x < player.x:
+                            projectiles.pop(projectiles.index(projectile))
+                    except:
+                        pass
+
             else:
                 projectiles.pop(projectiles.index(projectile))
     if goblin.visible == False:
-        for projectile in projectiles:
+        for projectile in projectiles: #projectile
             if projectile.x < 852 and projectile.x > 0:
                 if player.currentWeapon == 'Gun':
                     projectile.x += projectile.vel * 2
                 elif player.currentWeapon == 'Bow':
                     projectile.x += projectile.vel
+                elif player.currentWeapon == 'Spear':
+                    projectile.x += projectile.vel
+                    try:
+                        if projectile.x > player.x + 48:
+                            projectiles.pop(projectiles.index(projectile))
+                        if projectile.x < player.x:
+                            projectiles.pop(projectiles.index(projectile))
+                    except:
+                        pass
+
             else:
                 projectiles.pop(projectiles.index(projectile))
+
+    if keys[pygame.K_v] and len(goblins) < 1:
+        goblin.visible = True
+        goblins.append(goblin)
+        if len(goblins) < 1:
+            if goblin.visible == False:
+                print
+                goblins.pop(goblins.index(goblin))
 
 
     if keys[pygame.K_SPACE] and shootLoop == 0:
@@ -254,13 +299,15 @@ while run:
                 projectiles.append(Projectile(round(player.x + player.width // 2), round(player.y + player.height // 2),  2, (255,255,0), facing))
             elif player.currentWeapon == 'Bow':
                 projectiles.append(Projectile(round(player.x + player.width // 2), round(player.y + player.height // 2), 4, (162, 42, 42), facing))
+            elif player.currentWeapon == 'Spear':
+                projectiles.append(Projectile(round(player.x + player.width // 2), round(player.y + player.height // 2 + 5), 2, (0, 0, 0), facing))
         shootLoop = 1
-    if keys[pygame.K_a] and player.x > player.vel: # left
+    if keys[pygame.K_a] and player.x > player.vel: # left and might be able to use pygame.joystick command
         player.x -= player.vel
         player.left = True
         player.right = False
         player.standing = False
-    elif keys[pygame.K_d] and player.x < 865 - player.width - player.vel: #right
+    elif keys[pygame.K_d] and player.x < 865 - player.width - player.vel: # right, use pygame.joystick command
         player.x += player.vel
         player.left = False
         player.right = True
