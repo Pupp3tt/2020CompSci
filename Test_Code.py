@@ -3,7 +3,7 @@ from random import randint
 pygame.init()
 pygame.joystick.init()
 
-screen = pygame.display.set_mode((800, 480))
+screen = pygame.display.set_mode((795, 410))
 pygame.display.set_caption("First Game")
 clock = pygame.time.Clock()
 walkRight = [pygame.image.load('Sprites/R1.png'), pygame.image.load('Sprites/R2.png'), pygame.image.load('Sprites/R3.png'), pygame.image.load('Sprites/R4.png'), pygame.image.load('Sprites/R5.png'), pygame.image.load('Sprites/R6.png'), pygame.image.load('Sprites/R7.png'), pygame.image.load('Sprites/R8.png'), pygame.image.load('Sprites/R9.png')]
@@ -71,7 +71,7 @@ class Player(object):
                 self.x = self.x + 35
             else:
                 pass
-        self.y = 405
+        self.y = 340
         self.walkCount = 0
         if self.health > 0:
             self.health -= goblin.dmg
@@ -213,7 +213,7 @@ class drinks(Materials):
 ##################################################################
 
 def redrawGameWindow():
-    screen.blit(bg, (0,0))
+    screen.blit(bg, (0,-55))
     font_1 = pygame.font.SysFont("impact", 25)
     text_wep = font_1.render("Weapon: {}".format(player.currentWeapon), 0, (0, 0, 0))
     screen.blit(text_wep, (14, 30))
@@ -245,21 +245,21 @@ def proj_cycle(proj, projs):
             if proj.x + proj.radius > goblin.hitbox[0] and proj.x - proj.radius < goblin.hitbox[0] + goblin.hitbox[2]:
                 goblin.hit()
                 projs.pop(projs.index(proj))
-        if proj.x < 800 and proj.x > 0:
+        if proj.x < 795 and proj.x > 0:
             proj.x += proj.vel
         else:
             projs.pop(projs.index(proj))
 
     if goblin.visible == False:
-        if proj.x < 800 and proj.x > 0:
+        if proj.x < 795 and proj.x > 0:
             proj.x += proj.vel
         else:
             projs.pop(projs.index(proj))
 
 ##################################################################
 
-player = Player(300, 405, 64, 64)
-goblin = Enemy(100, 410, 64, 64, 400)
+player = Player(300, 335, 64, 64)
+goblin = Enemy(100, 340, 64, 64, 400)
 bullets = []
 arrows = []
 stabs = []
@@ -322,10 +322,10 @@ while run:
             goblin.visible = True
             goblins.append(goblin)
         if goblin.visible == False:
-            x = randint(100, 750)
+            x = randint(50, 750)
             goblins.pop(goblins.index(goblin))
             spawn_range(x)
-            goblin = Enemy(x, 410, 64, 64, 400)
+            goblin = Enemy(x, 340, 64, 64, 400)
 
 
     if keys[pygame.K_SPACE] and shootLoop == 0:
@@ -345,7 +345,7 @@ while run:
         player.left = True
         player.right = False
         player.standing = False
-    elif keys[pygame.K_d] and player.x < 865 - player.width - player.vel: # right, use pygame.joystick command
+    elif keys[pygame.K_d] and player.x < 795 - player.width - player.vel: # right, use pygame.joystick command
         player.x += player.vel
         player.left = False
         player.right = True
