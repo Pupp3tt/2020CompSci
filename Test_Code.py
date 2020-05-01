@@ -1,5 +1,6 @@
 import pygame
 pygame.init()
+import random 
 
 screen = pygame.display.set_mode((852, 480))
 pygame.display.set_caption("First Game")
@@ -11,6 +12,7 @@ char = pygame.image.load('Sprites/standing.png')
 YELLOW = (255, 255, 0)
 BLACK = (0, 0, 0)
 BROWN = (165, 42, 42)
+Food = [pygame.image.load('Sprites/L1.png')]
 
 
 class Player(object):
@@ -19,8 +21,10 @@ class Player(object):
         self.y = y
         self.width = width
         self.height = height
+        #how fast he moves
         self.vel = 5
         self.isJump = False
+        #how high he jumps and makes sure he stays on screen
         self.jumpCount = 10
         self.left = False
         self.right = False
@@ -49,7 +53,9 @@ class Player(object):
                 else:
                     screen.blit(walkLeft[0], (self.x, self.y))
             self.hitbox = (self.x + 17, self.y + 11, 29, 52)
+            #this draws the red health bar that is placed under the green bar
             pygame.draw.rect(screen, (255, 0, 0), (10, 10, 300, 20))
+            #implements green health bar at the top of screen
             pygame.draw.rect(screen, (0, 128, 0), (10, 10, 50 - (3 * (16 - self.health)), 20))
 
     def hit(self):
@@ -114,9 +120,11 @@ class Enemy(object):
                 self.walkCount = 0
 
             if self.vel > 0:
+                #makes enemy appear when walking right
                 screen.blit(self.walkRight[self.walkCount // 3], (self.x, self.y))
                 self.walkCount += 1
             else:
+                #makes enemy appear when walking left
                 screen.blit(self.walkLeft[self.walkCount // 3], (self.x, self.y))
                 self.walkCount += 1
             pygame.draw.rect(screen, (255,0,0), (self.hitbox[0], self.hitbox[1] - 20, 50, 10))
@@ -163,14 +171,54 @@ class Projectile(object):
 ##########################################################################
 
 class Materials(object):
-    pass
+    def __init__(self, x, y, radius, color, facing):
+        self.x = x
+        self.y = y
+        self.width = 25
+        self.height = 3
+        self.radius = radius
+        self.color = color
+        self.facing = facing
+        self.vel = 8 * facing
+        self.hitbox = (self.x+17, self.y + 2, 31, 57)
+        self.health = 10
+        self.visible = True
+        self.dmg = 10
+
+        @property
+        def items(self):
+            return self._items
+        @items.setter
+        def items(self, value):
+            self._items = value
+        
+        @property
+        def foods(self):
+            return self._foods
+        @foods.setter
+        def foods(self, value):
+            self._foods = value
+
+        def addFood(self, item):
+            self._foods.append(item)
+
+        def delFoods(self, item):
+            self._foods.remove(item)
+    
 
 
-class food(Materials):
-    def __init__(self):
-        Materials.__init__(self)
+    def draw(self, screem):
+        self.move()
+        if (self.visible):
+            if (self.standing):
+                screen.blit(pygame.image.load('Sprites/L1.png'), (200, 400))
 
-    pass
+
+    def food(self):
+        if (self.x == Player.x):
+            self.health += 1
+          
+    
 
 
 class drinks(Materials):
