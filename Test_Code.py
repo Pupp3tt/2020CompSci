@@ -1,4 +1,5 @@
 import pygame
+from random import randint
 pygame.init()
 pygame.joystick.init()
 
@@ -12,6 +13,7 @@ char = pygame.image.load('Sprites/standing.png')
 YELLOW = (255, 255, 0)
 BLACK = (0, 0, 0)
 BROWN = (165, 42, 42)
+font = pygame.font.SysFont("impact", 60)
 
 class Player(object):
     def __init__(self, x, y, width, height):
@@ -27,7 +29,7 @@ class Player(object):
         self.walkCount = 0
         self.standing = True
         self.hitbox = (self.x + 17, self.y + 11, 29, 52)
-        self.currentWeapon = 'Gun'
+        self.currentWeapon = 'Pistol'
         self.health = 100
         self.hit_counter = 0
         self.visible = True
@@ -57,9 +59,15 @@ class Player(object):
         self.isJump = False
         self.jumpCount = 10
         if goblin.x > self.x:
-            self.x = self.x - 35
+            if self.x > self.vel:
+                self.x = self.x - 35
+            else:
+                pass
         else:
-            self.x = self.x + 35
+            if self.x < 865 - self.width - self.vel:
+                self.x = self.x + 35
+            else:
+                pass
         self.y = 410
         self.walkCount = 0
         if self.health > 0:
@@ -67,15 +75,15 @@ class Player(object):
             self.hit_counter = self.hit_counter + 1  # This is the player's hit counter, if is higher than 9 player dies. Food decreases counter.
             if self.hit_counter > 9:
                 self.visible = False
-                self.x = 280
-                self.y = 280
-                self.isJump = True
 
     def die(self):
-        font = pygame.font.SysFont("impact", 60)
         text = font.render("GAME OVER", 1, (0, 0, 0))
         if self.visible == False:
             screen.blit(text, (440 - (text.get_width() / 2), 60))
+            if goblin.x >= self.x:
+                self.x = -1000
+            else:
+                self.x = 1000
 
     def checkWep(self):
         self.weapon_slot += 1
@@ -83,11 +91,11 @@ class Player(object):
             self.weapon_slot = 0
 
         if self.weapon_slot == 0:
-            self.currentWeapon = 'Gun'
+            self.currentWeapon = 'Pistol'
         elif self.weapon_slot == 1:
             self.currentWeapon = 'Bow'
         elif self.weapon_slot == 2:
-            self.currentWeapon = 'Spear'
+            self.currentWeapon = 'Knife'
 
 class Enemy(object):
     walkRight = [pygame.image.load('Sprites/R1E.png'), pygame.image.load('Sprites/R2E.png'), pygame.image.load('Sprites/R3E.png'), pygame.image.load('Sprites/R4E.png'), pygame.image.load('Sprites/R5E.png'), pygame.image.load('Sprites/R6E.png'), pygame.image.load('Sprites/R7E.png'), pygame.image.load('Sprites/R8E.png'), pygame.image.load('Sprites/R9E.png'), pygame.image.load('Sprites/R10E.png'), pygame.image.load('Sprites/R11E.png')]
@@ -101,7 +109,7 @@ class Enemy(object):
         self.height = height
         self.end = end
         self.walkCount = 0
-        self.vel = 1
+        self.vel = 3
         self.hitbox = (self.x+17, self.y + 2, 31, 57)
         self.health = 10
         self.visible = False
@@ -144,14 +152,6 @@ class Enemy(object):
         else:
             self.visible = False
 
-    def spawn(self):
-        self.life = True
-        if self.life == True:
-            self.move()
-            self.draw(screen)
-        elif self.life == False:
-            self.spawn()
-
 
 class Projectile(object):
     def __init__(self, x, y, radius, color, facing):
@@ -162,13 +162,30 @@ class Projectile(object):
         self.radius = radius
         self.color = color
         self.facing = facing
+        self.vel = 16 * facing
+
+class Bullet(Projectile):
+    def __init__(self, x, y, radius, color, facing):
+        Projectile.__init__(self, x, y, radius, color, facing)
+        self.vel = 24 * facing
+
+    def draw(self, screen):
+        pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), int(self.radius))
+
+class Arrow(Projectile):
+    def __init__(self, x, y, radius, color, facing):
+        Projectile.__init__(self, x, y, radius, color, facing)
+
+    def draw(self, screen):
+        pygame.draw.rect(screen, self.color, (int(self.x), int(self.y), int(self.width), int(self.height)))
+
+class Knife(Projectile):
+    def __init__(self, x, y, radius, color, facing):
+        Projectile.__init__(self, x, y, radius, color, facing)
         self.vel = 8 * facing
 
     def draw(self, screen):
-        if player.currentWeapon == 'Gun':
-            pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), int(self.radius))
-        elif player.currentWeapon == 'Bow' or player.currentWeapon == 'Spear':
-            pygame.draw.rect(screen, self.color, (int(self.x), int(self.y), int(self.width), int(self.height)))
+        pygame.draw.rect(screen, self.color, (int(self.x), int(self.y), int(self.width), int(self.height)))
 
 ##########################################################################
 
@@ -189,23 +206,65 @@ class drinks(Materials):
 
     pass
 
+##################################################################
+
 def redrawGameWindow():
+    font_1 = pygame.font.SysFont("impact", 25)
     screen.blit(bg, (0,0))
+    text_wep = font_1.render("Weapon: {}".format(player.currentWeapon), 1, (0, 0, 0))
+    screen.blit(text_wep, (14, 30))
+
     if player.visible == False:
         player.die()
     player.draw(screen)
-    for projectile in projectiles:
-        projectile.draw(screen)
+    for bullet in bullets:
+        bullet.draw(screen)
+    for arrow in arrows:
+        arrow.draw(screen)
+    for knife in stabs:
+        knife.draw(screen)
     for goblin in goblins:
-        goblin.spawn()
+        goblin.draw(screen)
     pygame.display.update()
+
+def spawn_range(x):
+    if (player.x - 100) <= x:
+        x -= 100
+        return x
+    if (player.x + 100) >= x:
+        x += 100
+        return x
+
+def proj_cycle(proj, projs):
+    if goblin.visible == True:
+        if proj.y - proj.radius < goblin.hitbox[1] + goblin.hitbox[3] and proj.y + proj.radius > goblin.hitbox[1]:
+            if proj.x + proj.radius > goblin.hitbox[0] and proj.x - proj.radius < goblin.hitbox[0] + goblin.hitbox[2]:
+                goblin.hit()
+                projs.pop(projs.index(proj))
+        if proj.x < 852 and proj.x > 0:
+            proj.x += proj.vel
+        else:
+            projs.pop(projs.index(proj))
+
+    if goblin.visible == False:
+        if proj.x < 852 and proj.x > 0:
+            proj.x += proj.vel
+        else:
+            projs.pop(projs.index(proj))
+
+##################################################################
 
 player = Player(300, 410, 64, 64)
 goblin = Enemy(100, 410, 64, 64, 450)
-projectiles = []
+bullets = []
+arrows = []
+stabs = []
 goblins = []
 shootLoop = 0
+cooldown = 0
 run = True
+
+##################################################################
 
 while run:
     clock.tick(27)
@@ -215,18 +274,19 @@ while run:
     if goblin.visible == True:
         if player.hitbox[1] < goblin.hitbox[1] + goblin.hitbox[3] and player.hitbox[1] + player.hitbox[3] > goblin.hitbox[1]:
             if player.hitbox[0] + player.hitbox[2] > goblin.hitbox[0] and player.hitbox[0] < goblin.hitbox[0] + goblin.hitbox[2]:
-                player.hit()
+                if cooldown == 0:
+                    player.hit()
+                    cooldown += 8
+                if cooldown > 0:
+                    cooldown -= 1
 
     if shootLoop > 0:
         shootLoop += 1
-    if player.currentWeapon == 'Gun':
+    if player.currentWeapon == 'Pistol' or player.currentWeapon == 'Knife':
         if shootLoop > 10:
             shootLoop = 0
     elif player.currentWeapon == 'Bow':
         if shootLoop > 20:
-            shootLoop = 0
-    elif player.currentWeapon == 'Spear':
-        if shootLoop > 10:
             shootLoop = 0
 
     for event in pygame.event.get():
@@ -236,57 +296,32 @@ while run:
             if event.key == pygame.K_c:
                 player.checkWep()
 
+    for bullet in bullets:
+        proj_cycle(bullet, bullets)
+    for arrow in arrows:
+        proj_cycle(arrow, arrows)
+    for knife in stabs:
+        proj_cycle(knife, stabs)
+        try:
+            if knife.x > player.x + 48:
+                stabs.pop(stabs.index(knife))
 
-    if goblin.visible == True:
-        for projectile in projectiles: #projectile
-            if projectile.y - projectile.radius < goblin.hitbox[1] + goblin.hitbox[3] and projectile.y + projectile.radius > goblin.hitbox[1]:
-                if projectile.x + projectile.radius > goblin.hitbox[0] and projectile.x - projectile.radius < goblin.hitbox[0] + goblin.hitbox[2]:
-                    goblin.hit()
-                    projectiles.pop(projectiles.index(projectile))
-            if projectile.x < 852 and projectile.x > 0:
-                if player.currentWeapon == 'Gun':
-                    projectile.x += projectile.vel * 2
-                elif player.currentWeapon == 'Bow':
-                    projectile.x += projectile.vel
-                elif player.currentWeapon == 'Spear':
-                    projectile.x += projectile.vel
-                    try:
-                        if projectile.x > player.x + 48:
-                            projectiles.pop(projectiles.index(projectile))
-                        if projectile.x < player.x:
-                            projectiles.pop(projectiles.index(projectile))
-                    except:
-                        pass
+            if knife.x < player.x:
+                stabs.pop(stabs.index(knife))
 
-            else:
-                projectiles.pop(projectiles.index(projectile))
-    if goblin.visible == False:
-        for projectile in projectiles: #projectile
-            if projectile.x < 852 and projectile.x > 0:
-                if player.currentWeapon == 'Gun':
-                    projectile.x += projectile.vel * 2
-                elif player.currentWeapon == 'Bow':
-                    projectile.x += projectile.vel
-                elif player.currentWeapon == 'Spear':
-                    projectile.x += projectile.vel
-                    try:
-                        if projectile.x > player.x + 48:
-                            projectiles.pop(projectiles.index(projectile))
-                        if projectile.x < player.x:
-                            projectiles.pop(projectiles.index(projectile))
-                    except:
-                        pass
+        except:
+            pass
 
-            else:
-                projectiles.pop(projectiles.index(projectile))
 
-    if keys[pygame.K_v] and len(goblins) < 1:
-        goblin.visible = True
-        goblins.append(goblin)
+    if keys[pygame.K_v]:
         if len(goblins) < 1:
-            if goblin.visible == False:
-                print
-                goblins.pop(goblins.index(goblin))
+            goblin.visible = True
+            goblins.append(goblin)
+        if goblin.visible == False:
+            x = randint(100, 750)
+            goblins.pop(goblins.index(goblin))
+            spawn_range(x)
+            goblin = Enemy(x, 410, 64, 64, 450)
 
 
     if keys[pygame.K_SPACE] and shootLoop == 0:
@@ -294,13 +329,12 @@ while run:
             facing = -1
         else:
             facing = 1
-        if len(projectiles) < 5:
-            if player.currentWeapon == 'Gun':
-                projectiles.append(Projectile(round(player.x + player.width // 2), round(player.y + player.height // 2),  2, (255,255,0), facing))
-            elif player.currentWeapon == 'Bow':
-                projectiles.append(Projectile(round(player.x + player.width // 2), round(player.y + player.height // 2), 4, (162, 42, 42), facing))
-            elif player.currentWeapon == 'Spear':
-                projectiles.append(Projectile(round(player.x + player.width // 2), round(player.y + player.height // 2 + 5), 2, (0, 0, 0), facing))
+        if player.currentWeapon == 'Pistol':
+            bullets.append(Bullet(round(player.x + player.width // 2), round(player.y + player.height // 2 + 5),  2, (255,255,0), facing))
+        if player.currentWeapon == 'Bow':
+            arrows.append(Arrow(round(player.x + player.width // 2), round(player.y + player.height // 2 + 5), 4, (162, 42, 42), facing))
+        if player.currentWeapon == 'Knife':
+            stabs.append(Knife(round((player.x - 5) + player.width // 2), round(player.y + player.height // 2 + 5), 2, (0, 0, 0), facing))
         shootLoop = 1
     if keys[pygame.K_a] and player.x > player.vel: # left and might be able to use pygame.joystick command
         player.x -= player.vel
@@ -324,7 +358,7 @@ while run:
             neg = 1
             if player.jumpCount < 0:
                 neg = -1
-            player.y -= (player.jumpCount ** 2) * 0.5 * neg
+            player.y -= (player.jumpCount ** 2) * 0.3 * neg
             player.jumpCount -= 1
         else:
             player.isJump = False
