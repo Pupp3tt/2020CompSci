@@ -12,7 +12,7 @@ pygame.joystick.init()
 
 screen = pygame.display.set_mode((795, 410))
 
-pygame.display.set_caption("First Game")
+pygame.display.set_caption("Rotten Woods")
 
 clock = pygame.time.Clock()
 
