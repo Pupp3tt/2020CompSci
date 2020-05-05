@@ -598,7 +598,7 @@ while run:
 
         if event.type == pygame.KEYDOWN:
 
-            if event.key == pygame.K_c:
+            if event.key == pygame.K_c:  # (Different style from the others) Cycles through weapons - C key
 
                 player.checkWep()
 
@@ -638,7 +638,7 @@ while run:
 
 
 
-    if keys[pygame.K_v]:
+    if keys[pygame.K_v]:  # Spawns Zombie - V key
 
         if len(goblins) < 1:
 
@@ -660,7 +660,7 @@ while run:
 
 
 
-    if keys[pygame.K_SPACE] and shootLoop == 0:
+    if keys[pygame.K_SPACE] and shootLoop == 0: # Shoots projectile - Space Key
 
         if player.left:
 
@@ -684,7 +684,7 @@ while run:
 
         shootLoop = 1
 
-    if keys[pygame.K_a] and player.x > player.vel: # left and might be able to use pygame.joystick command
+    if keys[pygame.K_a] and player.x > player.vel: # Moves left - A key
 
         player.x -= player.vel
 
@@ -694,7 +694,7 @@ while run:
 
         player.standing = False
 
-    elif keys[pygame.K_d] and player.x < 795 - player.width - player.vel: # right, use pygame.joystick command
+    elif keys[pygame.K_d] and player.x < 795 - player.width - player.vel: # Moves right - D key
 
         player.x += player.vel
 
@@ -745,5 +745,3 @@ while run:
 
 
 pygame.quit()
-
-#Hello
