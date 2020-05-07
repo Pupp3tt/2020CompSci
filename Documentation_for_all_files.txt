@@ -1,0 +1,13 @@
+.git - git hubs 
+ArtWork - has all artwork for game 
+Code - has input/Output code 
+Sprites - has player and zombies with animation 
+Wire and Code Documentation - has wire set up and how Joystick works 
+____ Agreement.docx - team agreement 
+git test.py - test code 
+group 12 plan.xlsx - plan of action for project 
+Group project work.docx - original ideas
+piano_v1.py - not for this project 
+Test Code.py - first test code 
+Test_Code.py - the actual game code
+writeup-1.odt - Plan for entire project at start 

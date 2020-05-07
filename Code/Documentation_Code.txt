@@ -1,0 +1,3 @@
+Input # 2-6 are test
+input_final - is actualy ready. Add to base game checkAll()  to check all inputs and use Output_Fuinctions to do something to main code 
+Output_Functions - is all the actons done when a button is pressed and will effect the main code 
