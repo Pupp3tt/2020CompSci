@@ -158,7 +158,7 @@ class Player(object):
 
         else:
 
-            if self.x < 865 - self.width - self.vel:
+            if self.x < 795 - self.width - self.vel:
 
                 self.x = self.x + 35
 
