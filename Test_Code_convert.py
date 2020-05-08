@@ -561,11 +561,7 @@ cooldown = 0
 
 run = True
 
-x = ReadChannel(vrx_channel)
-
 ##################################################################
-
-
 
 while run:
 
@@ -574,6 +570,7 @@ while run:
 
 
     keys = pygame.key.get_pressed()
+    x = ReadChannel(vrx_channel)
 
 
 
