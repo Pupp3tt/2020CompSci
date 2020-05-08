@@ -621,7 +621,7 @@ while run:
 
         if event.type == pygame.KEYDOWN:
 
-            if event.key == pygame.K_c:  # (Different style from the others) Cycles through weapons - C key
+            if event.key == pygame.K_c or GPIO.input(buttons[1]):  # (Different style from the others) Cycles through weapons - C key
 
                 player.checkWep()
 
@@ -661,7 +661,7 @@ while run:
 
 
 
-    if keys[pygame.K_v]:  # Spawns Zombie - V key
+    if keys[pygame.K_v] or GPIO.input(buttons[8]) == True:  # Spawns Zombie - V key
 
         if len(goblins) < 1:
 
@@ -707,7 +707,7 @@ while run:
 
         shootLoop = 1
 
-    if keys[pygame.K_a] and player.x > player.vel or x <= 10: # Moves left - A key
+    if keys[pygame.K_a] and player.x > player.vel or x <= 10 and player.x > player.vel: # Moves left - A key
 
         player.x -= player.vel
 
@@ -717,7 +717,7 @@ while run:
 
         player.standing = False
 
-    elif keys[pygame.K_d] and player.x < 795 - player.width - player.vel or x >= 1000: # Moves right - D key
+    elif keys[pygame.K_d] and player.x < 795 - player.width - player.vel or x >= 1000 and player.x < 795 - player.width: # Moves right - D key
 
         player.x += player.vel
 
@@ -735,7 +735,7 @@ while run:
 
     if not(player.isJump):
 
-        if keys[pygame.K_w]:
+        if keys[pygame.K_w] or GPIO.input(buttons[2]):
 
             player.isJump = True
 
