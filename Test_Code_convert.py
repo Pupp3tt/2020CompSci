@@ -23,6 +23,10 @@ walkLeft = [pygame.image.load('Sprites/L1.png'), pygame.image.load('Sprites/L2.p
 
 bg = pygame.image.load('ArtWork/background.png')
 
+bg_in = pygame.image.load('Artwork/background_inside_house_1.png')
+
+bg_mode = "Out"
+
 char = pygame.image.load('Sprites/standing.png')
 
 YELLOW = (255, 255, 0)
@@ -166,7 +170,7 @@ class Player(object):
 
                 pass
 
-        self.y = 340
+        self.y = 335
 
         self.walkCount = 0
 
@@ -298,29 +302,30 @@ class Enemy(object):
 
     def move(self):
 
-        if self.vel > 0:
+        if Pause == False:
+            if self.vel > 0:
 
-            if self.x + self.vel < player.x + 20:
+                if self.x + self.vel < player.x + 20:
 
-                self.x += self.vel
+                    self.x += self.vel
 
-            else:
+                else:
 
-                self.vel = self.vel * -1
+                    self.vel = self.vel * -1
 
-                self.walkCount = 0
-
-        else:
-
-            if self.x - self.vel > player.x - 20:
-
-                self.x += self.vel
+                    self.walkCount = 0
 
             else:
 
-                self.vel = self.vel * -1
+                if self.x - self.vel > player.x - 20:
 
-                self.walkCount = 0
+                    self.x += self.vel
+
+                else:
+
+                    self.vel = self.vel * -1
+
+                    self.walkCount = 0
 
 
 
@@ -450,6 +455,9 @@ class drinks(Materials):
 
 def redrawGameWindow():
 
+    door_x = 730
+    door_y = 335
+
     screen.blit(bg, (0,-55))
 
     font_1 = pygame.font.SysFont("impact", 25)
@@ -458,7 +466,11 @@ def redrawGameWindow():
 
     screen.blit(text_wep, (14, 30))
 
+    pygame.draw.rect(screen, BROWN, (door_x, door_y, 32, 64))
 
+    if Pause == True:
+        pygame.draw.rect(screen, (0, 0, 0), (300, 100, 35, 200))
+        pygame.draw.rect(screen, (0, 0, 0), (450, 100, 35, 200))
 
     if player.visible == False:
 
@@ -504,33 +516,35 @@ def spawn_range(x):
 
 def proj_cycle(proj, projs):
 
-    if goblin.visible == True:
+    if Pause == False:
 
-        if proj.y - proj.radius < goblin.hitbox[1] + goblin.hitbox[3] and proj.y + proj.radius > goblin.hitbox[1]:
+        if goblin.visible == True:
 
-            if proj.x + proj.radius > goblin.hitbox[0] and proj.x - proj.radius < goblin.hitbox[0] + goblin.hitbox[2]:
+            if proj.y - proj.radius < goblin.hitbox[1] + goblin.hitbox[3] and proj.y + proj.radius > goblin.hitbox[1]:
 
-                goblin.hit()
+                if proj.x + proj.radius > goblin.hitbox[0] and proj.x - proj.radius < goblin.hitbox[0] + goblin.hitbox[2]:
+
+                    goblin.hit()
+
+                    projs.pop(projs.index(proj))
+
+            if proj.x < 795 and proj.x > 0:
+
+                proj.x += proj.vel
+
+            else:
 
                 projs.pop(projs.index(proj))
 
-        if proj.x < 795 and proj.x > 0:
+        if goblin.visible == False:
 
-            proj.x += proj.vel
+            if proj.x < 795 and proj.x > 0:
 
-        else:
+                proj.x += proj.vel
 
-            projs.pop(projs.index(proj))
+            else:
 
-    if goblin.visible == False:
-
-        if proj.x < 795 and proj.x > 0:
-
-            proj.x += proj.vel
-
-        else:
-
-            projs.pop(projs.index(proj))
+                projs.pop(projs.index(proj))
 
 def ReadChannel(channel):
     adc = spi.xfer2([1, (8 + channel) << 4, 0])
@@ -561,6 +575,8 @@ cooldown = 0
 
 run = True
 
+Pause = False
+
 ##################################################################
 
 while run:
@@ -573,22 +589,23 @@ while run:
     x = ReadChannel(vrx_channel)
 
 
+    if Pause == False:
 
-    if goblin.visible == True:
+        if goblin.visible == True:
 
-        if player.hitbox[1] < goblin.hitbox[1] + goblin.hitbox[3] and player.hitbox[1] + player.hitbox[3] > goblin.hitbox[1]:
+            if player.hitbox[1] < goblin.hitbox[1] + goblin.hitbox[3] and player.hitbox[1] + player.hitbox[3] > goblin.hitbox[1]:
 
-            if player.hitbox[0] + player.hitbox[2] > goblin.hitbox[0] and player.hitbox[0] < goblin.hitbox[0] + goblin.hitbox[2]:
+                if player.hitbox[0] + player.hitbox[2] > goblin.hitbox[0] and player.hitbox[0] < goblin.hitbox[0] + goblin.hitbox[2]:
 
-                if cooldown == 0:
+                    if cooldown == 0:
 
-                    player.hit()
+                        player.hit()
 
-                    cooldown += 5
+                        cooldown += 5
 
-                if cooldown > 0:
+                    if cooldown > 0:
 
-                    cooldown -= 1
+                        cooldown -= 1
 
 
 
@@ -618,145 +635,178 @@ while run:
 
         if event.type == pygame.KEYDOWN:
 
-            if event.key == pygame.K_c or GPIO.input(buttons[1]):  # (Different style from the others) Cycles through weapons - C key
+            if Pause == False:
 
-                player.checkWep()
+                if event.key == pygame.K_c:  # (Different style from the others) Cycles through weapons - C key
 
+                    player.checkWep()
 
+            if event.key == pygame.K_ESCAPE: #Pause Game - Escape key
 
-    for bullet in bullets:
+                if Pause == False:
 
-        proj_cycle(bullet, bullets)
+                    Pause = True
 
-    for arrow in arrows:
+                    pygame.draw.rect(screen, (0, 0, 0), (100, 100, 100, 100))
 
-        proj_cycle(arrow, arrows)
+                elif Pause == True:
 
-    for knife in stabs:
+                    Pause = False
 
-        proj_cycle(knife, stabs)
+            if event.key == pygame.K_e: #Use on door to switch between house and outside - E key
 
-        try:
+                if player.x in range(698, 762):
 
-            if knife.x > player.x + 48:
+                    if bg_mode == "Out":
 
-                stabs.pop(stabs.index(knife))
+                        bg = pygame.image.load('ArtWork/background_inside_house_1.png')
 
+                        bg_mode = "In"
 
+                        goblins.pop(goblins.index(goblin))
 
-            if knife.x < player.x:
+                    elif bg_mode == "In":
 
-                stabs.pop(stabs.index(knife))
+                        bg = pygame.image.load('ArtWork/background.png')
 
+                        bg_mode = "Out"
 
-
-        except:
-
-            pass
-
-
-
-
-
-    if keys[pygame.K_v] or GPIO.input(buttons[8]) == True:  # Spawns Zombie - V key
-
-        if len(goblins) < 1:
-
-            goblin.visible = True
-
-            goblins.append(goblin)
-
-        if goblin.visible == False:
-
-            x = randint(50, 750)
-
-            goblins.pop(goblins.index(goblin))
-
-            spawn_range(x)
-
-            goblin = Enemy(x, 340, 64, 64, 400)
+                        goblins.pop(goblins.index(goblin))
 
 
+    if Pause == False:
+
+        for bullet in bullets:
+
+            proj_cycle(bullet, bullets)
+
+        for arrow in arrows:
+
+            proj_cycle(arrow, arrows)
+
+        for knife in stabs:
+
+            proj_cycle(knife, stabs)
+
+            try:
+
+                if knife.x > player.x + 48:
+
+                    stabs.pop(stabs.index(knife))
 
 
 
-    if keys[pygame.K_SPACE] and shootLoop == 0 or GPIO.input(buttons[5]) == True and shootLoop == 0: # Shoots projectile - Space Key
+                if knife.x < player.x:
 
-        if player.left:
+                    stabs.pop(stabs.index(knife))
 
-            facing = -1
+            except:
+
+                pass
+
+
+
+
+    if Pause == False:
+
+        if keys[pygame.K_v] or GPIO.input(buttons[8]) == True:  # Spawns Zombie - V key
+
+            if len(goblins) < 1:
+
+                goblin.visible = True
+
+                goblins.append(goblin)
+
+            if goblin.visible == False:
+
+                x = randint(50, 750)
+
+                goblins.pop(goblins.index(goblin))
+
+                spawn_range(x)
+
+                goblin = Enemy(x, 340, 64, 64, 400)
+
+        if keys[pygame.K_SPACE] and shootLoop == 0 or GPIO.input(buttons[5]) == True and shootLoop == 0: # Shoots projectile - Space Key
+
+            if player.left:
+
+                facing = -1
+
+            else:
+
+                facing = 1
+
+            if player.currentWeapon == 'Pistol':
+
+                bullets.append(Bullet(round(player.x + player.width // 2), round(player.y + player.height // 2 + 5),  2, (255,255,0), facing))
+
+            if player.currentWeapon == 'Bow':
+
+                arrows.append(Arrow(round(player.x + player.width // 2), round(player.y + player.height // 2 + 5), 4, (162, 42, 42), facing))
+
+            if player.currentWeapon == 'Knife':
+
+                stabs.append(Knife(round((player.x - 5) + player.width // 2), round(player.y + player.height // 2 + 5), 2, (0, 0, 0), facing))
+
+            shootLoop = 1
+
+        if keys[pygame.K_a] and player.x > player.vel or x <= 10 and player.x > player.vel: # Moves left - A key
+
+            player.x -= player.vel
+
+            player.left = True
+
+            player.right = False
+
+            player.standing = False
+
+        elif keys[pygame.K_d] and player.x < 795 - player.width - player.vel or x >= 1000 and player.x < 795 - player.width: # Moves right - D key
+
+            player.x += player.vel
+
+            player.left = False
+
+            player.right = True
+
+            player.standing = False
 
         else:
 
-            facing = 1
-
-        if player.currentWeapon == 'Pistol':
-
-            bullets.append(Bullet(round(player.x + player.width // 2), round(player.y + player.height // 2 + 5),  2, (255,255,0), facing))
-
-        if player.currentWeapon == 'Bow':
-
-            arrows.append(Arrow(round(player.x + player.width // 2), round(player.y + player.height // 2 + 5), 4, (162, 42, 42), facing))
-
-        if player.currentWeapon == 'Knife':
-
-            stabs.append(Knife(round((player.x - 5) + player.width // 2), round(player.y + player.height // 2 + 5), 2, (0, 0, 0), facing))
-
-        shootLoop = 1
-
-    if keys[pygame.K_a] and player.x > player.vel or x <= 10 and player.x > player.vel: # Moves left - A key
-
-        player.x -= player.vel
-
-        player.left = True
-
-        player.right = False
-
-        player.standing = False
-
-    elif keys[pygame.K_d] and player.x < 795 - player.width - player.vel or x >= 1000 and player.x < 795 - player.width: # Moves right - D key
-
-        player.x += player.vel
-
-        player.left = False
-
-        player.right = True
-
-        player.standing = False
-
-    else:
-
-        player.standing = True
-
-        player.walkCount = 0
-
-    if not(player.isJump):
-
-        if keys[pygame.K_w] or GPIO.input(buttons[2]):
-
-            player.isJump = True
+            player.standing = True
 
             player.walkCount = 0
 
-    else:
+        if not(player.isJump):
 
-        if player.jumpCount >= -10:
+            if keys[pygame.K_w] or GPIO.input(buttons[2]):
 
-            neg = 1
+                player.isJump = True
 
-            if player.jumpCount < 0:
-
-                neg = -1
-
-            player.y -= (player.jumpCount ** 2) * 0.3 * neg
-
-            player.jumpCount -= 1
+                player.walkCount = 0
 
         else:
 
-            player.isJump = False
+            if player.jumpCount >= -10:
 
-            player.jumpCount = 10
+                neg = 1
+
+                if player.jumpCount < 0:
+
+                    neg = -1
+
+                player.y -= (player.jumpCount ** 2) * 0.3 * neg
+
+                player.jumpCount -= 1
+
+            else:
+
+                player.isJump = False
+
+                player.jumpCount = 10
+
+    else:
+        pass
 
 
 
