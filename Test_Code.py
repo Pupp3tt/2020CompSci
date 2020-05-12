@@ -422,6 +422,7 @@ def redrawGameWindow():
     if Pause == True:
 
         pygame.draw.rect(screen, (0, 0, 0), (300, 100, 35, 200))
+
         pygame.draw.rect(screen, (0, 0, 0), (450, 100, 35, 200))
 
     if player.visible == False:
@@ -571,35 +572,56 @@ while run:
     for event in pygame.event.get():
 
         if event.type == pygame.QUIT:
+
             run = False
+
         if event.type == pygame.KEYDOWN:
-            if Pause == False:
-                #if event.key == pygame.K_c:  # (Different style from the others) Cycles through weapons - C key
-                    #player.checkWep()
-                pass
+
             if event.key == pygame.K_ESCAPE:
+
                 if Pause == False:
+
                     Pause = True
+
                     pygame.draw.rect(screen, (0, 0, 0), (100, 100, 100, 100))
+
                 elif Pause == True:
+
                     Pause = False
+
             if event.key == pygame.K_e:
+
                 if player.x in range(698, 762):
+
                     if bg_mode == "Out":
+
                         bg = pygame.image.load('ArtWork/background_inside_house_1.png')
+
                         bg_mode = "In"
+
                         goblins.pop(goblins.index(goblin))
+
                     elif bg_mode == "In":
+
                         bg = pygame.image.load('ArtWork/background.png')
+
                         bg_mode = "Out"
+
                         goblins.pop(goblins.index(goblin))
 
 
 
-    if keys[pygame.K_c]:
+    if keys[pygame.K_c]: # Switch to Pistol - C key
+
         player.currentWeapon = "Pistol"
-    if keys[pygame.K_b]:
+
+    if keys[pygame.K_b]: # Switch to Knife - B key
+
         player.currentWeapon = "Knife"
+
+    if keys[pygame.K_n]: # Switch to Knife - N key
+
+        player.currentWeapon = "Bow"
 
     if Pause == False:
         for bullet in bullets:
