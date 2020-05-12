@@ -574,8 +574,9 @@ while run:
             run = False
         if event.type == pygame.KEYDOWN:
             if Pause == False:
-                if event.key == pygame.K_c:  # (Different style from the others) Cycles through weapons - C key
-                    player.checkWep()
+                #if event.key == pygame.K_c:  # (Different style from the others) Cycles through weapons - C key
+                    #player.checkWep()
+                pass
             if event.key == pygame.K_ESCAPE:
                 if Pause == False:
                     Pause = True
@@ -587,12 +588,18 @@ while run:
                     if bg_mode == "Out":
                         bg = pygame.image.load('ArtWork/background_inside_house_1.png')
                         bg_mode = "In"
-                        goblin.visible = False
+                        goblins.pop(goblins.index(goblin))
                     elif bg_mode == "In":
                         bg = pygame.image.load('ArtWork/background.png')
                         bg_mode = "Out"
-                        goblin.visible = False
+                        goblins.pop(goblins.index(goblin))
 
+
+
+    if keys[pygame.K_c]:
+        player.currentWeapon = "Pistol"
+    if keys[pygame.K_b]:
+        player.currentWeapon = "Knife"
 
     if Pause == False:
         for bullet in bullets:
