@@ -635,12 +635,6 @@ while run:
 
         if event.type == pygame.KEYDOWN:
 
-            if Pause == False:
-
-                if event.key == pygame.K_c:  # (Different style from the others) Cycles through weapons - C key
-
-                    player.checkWep()
-
             if event.key == pygame.K_ESCAPE: #Pause Game - Escape key
 
                 if Pause == False:
@@ -672,6 +666,20 @@ while run:
                         bg_mode = "Out"
 
                         goblins.pop(goblins.index(goblin))
+
+    if Pause == False:
+
+        if keys[pygame.K_c]:  # Switch to Pistol - C key
+
+            player.currentWeapon = "Pistol"
+
+        if keys[pygame.K_b]:  # Switch to Knife - B key
+
+            player.currentWeapon = "Knife"
+
+        if keys[pygame.K_n]:  # Switch to Knife - N key
+
+            player.currentWeapon = "Bow"
 
 
     if Pause == False:
