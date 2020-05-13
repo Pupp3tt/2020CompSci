@@ -73,19 +73,19 @@ def leftJoystick():
 
 def checkButtons(i): # check right buttons based off the index in list
     if (i == 0): # +1 on wepons
-        changeWeponsRight()
+        return "wepon"
     if (i == 1): # jump
-        jump()
+        return "jump"
     if (i == 2): # shoot
-        shoot()
+        return "shoot"
     if (i == 3): # use items
-        useItem()
+        return "item"
     if (i == 4): # -1 on wepons
-        changeWeponsLeft()
+        return "wepons"
     if (i == 5): #ESC
-        pause()
-    if (i == 6):
-        spawnZombie()
+        return "ESC"
+    if (i == 6): #spawn zombie
+        return "zombie"
 
 def movePlayer(): # check right joystick x value
     # check for x
@@ -93,12 +93,12 @@ def movePlayer(): # check right joystick x value
     #print ("x value")
     #print (x)
     if (10 <= x <= 1000):
-        stand()
+        return "stand"
     else:
         if(x >= 1000):
-            moveRight()
+            return "right"
         elif(x<= 10):
-            moveLeft()
+            return "left"
 
 def moveCrossHair(): # check left joystick x and y value
     # Check for x
@@ -120,14 +120,19 @@ def moveCrossHair(): # check left joystick x and y value
 def checkAll(): # a function to do everything
     for i in range(len(buttons)):  # Check all buttons
         if (GPIO.input(buttons[i]) == True):  # If one is press find that button #
-            checkButtons(i)  # do something with buttons #
+            first = checkButtons(i)  # do something with buttons #
 
     # joystick right
-    movePlayer()
+    second = movePlayer()
     # joystick left
     # moveCrossHair()
     # sleep
     time.sleep(0.1)
+    # return code
+    return first, second
+
+
+
 
 
        # Actual Code for testing
