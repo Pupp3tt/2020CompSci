@@ -8,8 +8,6 @@ pygame.init()
 
 pygame.joystick.init()
 
-import time
-
 screen = pygame.display.set_mode((795, 410))
 
 pygame.display.set_caption("Rotten Woods")
@@ -22,7 +20,7 @@ walkLeft = [pygame.image.load('Sprites/L1.png'), pygame.image.load('Sprites/L2.p
 
 bg = pygame.image.load('ArtWork/background.png')
 
-bg_in = pygame.image.load('Artwork/background_inside_house_1.png')
+bg_in = pygame.image.load('ArtWork/background_inside_house_1.png')
 
 bg_mode = "Out"
 
@@ -76,7 +74,6 @@ class Player(object):
 
         self.weapon_slot = 0
 
-        self.pause = 0
 
 
 
@@ -208,7 +205,6 @@ class Player(object):
 
             self.currentWeapon = 'Knife'
 
-
 class Enemy(object):
 
     walkRight = [pygame.image.load('Sprites/R1E.png'), pygame.image.load('Sprites/R2E.png'), pygame.image.load('Sprites/R3E.png'), pygame.image.load('Sprites/R4E.png'), pygame.image.load('Sprites/R5E.png'), pygame.image.load('Sprites/R6E.png'), pygame.image.load('Sprites/R7E.png'), pygame.image.load('Sprites/R8E.png'), pygame.image.load('Sprites/R9E.png'), pygame.image.load('Sprites/R10E.png'), pygame.image.load('Sprites/R11E.png')]
@@ -248,6 +244,7 @@ class Enemy(object):
 
 
     def draw(self, screen):
+
             self.move()
 
             if self.visible:
@@ -279,6 +276,7 @@ class Enemy(object):
 
 
     def move(self):
+
         if Pause == False:
             if self.vel > 0:
 
@@ -388,8 +386,6 @@ class food(Materials):
 
         Materials.__init__(self)
 
-
-
     pass
 
 class drinks(Materials):
@@ -398,8 +394,6 @@ class drinks(Materials):
 
         Materials.__init__(self)
 
-
-
     pass
 
 ##################################################################
@@ -407,6 +401,7 @@ class drinks(Materials):
 def redrawGameWindow():
 
     door_x = 730
+
     door_y = 335
 
     screen.blit(bg, (0,-55))
@@ -451,15 +446,15 @@ def redrawGameWindow():
 
 def spawn_range(x):
 
-    if (player.x - 100) <= x:
+    if (player.x - 50) <= x:
 
-        x -= 100
+        x -= 50
 
         return x
 
-    if (player.x + 100) >= x:
+    if (player.x + 50) >= x:
 
-        x += 100
+        x += 50
 
         return x
 
@@ -485,8 +480,6 @@ def proj_cycle(proj, projs):
             else:
 
                 projs.pop(projs.index(proj))
-
-
 
         if goblin.visible == False:
 
@@ -529,8 +522,9 @@ while run:
 
     clock.tick(27)
 
-
     keys = pygame.key.get_pressed()
+
+    x = randint(50, 745)
 
     if Pause == False:
         if goblin.visible == True:
@@ -599,7 +593,14 @@ while run:
 
                         bg_mode = "In"
 
-                        goblins.pop(goblins.index(goblin))
+                        if goblin.visible == True:
+
+                            goblins.pop(goblins.index(goblin))
+
+                            spawn_range(x)
+
+                            goblin = Enemy(x, 340, 64, 64, 400)
+
 
                     elif bg_mode == "In":
 
@@ -607,23 +608,26 @@ while run:
 
                         bg_mode = "Out"
 
-                        goblins.pop(goblins.index(goblin))
+                        if goblin.visible == True:
 
+                            goblin.visible = False
 
+                            goblins.pop(goblins.index(goblin))
 
-    if keys[pygame.K_c]: # Switch to Pistol - C key
-
-        player.currentWeapon = "Pistol"
-
-    if keys[pygame.K_b]: # Switch to Knife - B key
-
-        player.currentWeapon = "Knife"
-
-    if keys[pygame.K_n]: # Switch to Knife - N key
-
-        player.currentWeapon = "Bow"
 
     if Pause == False:
+        if keys[pygame.K_c]: # Switch to Pistol - C key
+
+            player.currentWeapon = "Pistol"
+
+        if keys[pygame.K_b]: # Switch to Knife - B key
+
+            player.currentWeapon = "Knife"
+
+        if keys[pygame.K_n]: # Switch to Knife - N key
+
+            player.currentWeapon = "Bow"
+
         for bullet in bullets:
 
             proj_cycle(bullet, bullets)
@@ -648,16 +652,11 @@ while run:
 
                     stabs.pop(stabs.index(knife))
 
-
-
             except:
 
                 pass
 
 
-
-
-    if Pause == False:
         if keys[pygame.K_v]:  # Spawns Zombie - V key
 
             if len(goblins) < 1:
@@ -668,18 +667,12 @@ while run:
 
             if goblin.visible == False:
 
-                x = randint(50, 705)
-
                 goblins.pop(goblins.index(goblin))
 
                 spawn_range(x)
 
                 goblin = Enemy(x, 340, 64, 64, 400)
 
-
-
-
-    if Pause == False:
         if keys[pygame.K_SPACE] and shootLoop == 0: # Shoots projectile - Space Key
 
             if player.left:

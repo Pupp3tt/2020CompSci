@@ -1,8 +1,13 @@
 import pygame
+
 import RPi.GPIO as GPIO
+
 from random import randint
+
 import spidev
+
 import os
+
 import time
 
 pygame.init()
@@ -23,7 +28,7 @@ walkLeft = [pygame.image.load('Sprites/L1.png'), pygame.image.load('Sprites/L2.p
 
 bg = pygame.image.load('ArtWork/background.png')
 
-bg_in = pygame.image.load('Artwork/background_inside_house_1.png')
+bg_in = pygame.image.load('ArtWork/background_inside_house_1.png')
 
 bg_mode = "Out"
 
@@ -228,8 +233,6 @@ class Player(object):
 
             self.currentWeapon = 'Knife'
 
-
-
 class Enemy(object):
 
     walkRight = [pygame.image.load('Sprites/R1E.png'), pygame.image.load('Sprites/R2E.png'), pygame.image.load('Sprites/R3E.png'), pygame.image.load('Sprites/R4E.png'), pygame.image.load('Sprites/R5E.png'), pygame.image.load('Sprites/R6E.png'), pygame.image.load('Sprites/R7E.png'), pygame.image.load('Sprites/R8E.png'), pygame.image.load('Sprites/R9E.png'), pygame.image.load('Sprites/R10E.png'), pygame.image.load('Sprites/R11E.png')]
@@ -339,10 +342,6 @@ class Enemy(object):
 
             self.visible = False
 
-
-
-
-
 class Projectile(object):
 
     def __init__(self, x, y, radius, color, facing):
@@ -363,8 +362,6 @@ class Projectile(object):
 
         self.vel = 16 * facing
 
-
-
 class Bullet(Projectile):
 
     def __init__(self, x, y, radius, color, facing):
@@ -378,7 +375,6 @@ class Bullet(Projectile):
     def draw(self, screen):
 
         pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), int(self.radius))
-
 
 
 class Arrow(Projectile):
@@ -456,6 +452,7 @@ class drinks(Materials):
 def redrawGameWindow():
 
     door_x = 730
+
     door_y = 335
 
     screen.blit(bg, (0,-55))
@@ -469,7 +466,9 @@ def redrawGameWindow():
     pygame.draw.rect(screen, BROWN, (door_x, door_y, 32, 64))
 
     if Pause == True:
+
         pygame.draw.rect(screen, (0, 0, 0), (300, 100, 35, 200))
+
         pygame.draw.rect(screen, (0, 0, 0), (450, 100, 35, 200))
 
     if player.visible == False:
@@ -496,19 +495,17 @@ def redrawGameWindow():
 
     pygame.display.update()
 
-
-
 def spawn_range(x):
 
-    if (player.x - 100) <= x:
+    if (player.x - 50) <= x:
 
-        x -= 100
+        x -= 50
 
         return x
 
-    if (player.x + 100) >= x:
+    if (player.x + 50) >= x:
 
-        x += 100
+        x += 50
 
         return x
 
@@ -583,9 +580,10 @@ while run:
 
     clock.tick(27)
 
-
+    x_int = randint(50, 745)
 
     keys = pygame.key.get_pressed()
+
     x = ReadChannel(vrx_channel)
 
 
@@ -657,7 +655,12 @@ while run:
 
                         bg_mode = "In"
 
-                        goblins.pop(goblins.index(goblin))
+                        if goblin.visible == True:
+                            goblins.pop(goblins.index(goblin))
+
+                            spawn_range(x_int)
+
+                            goblin = Enemy(x_int, 340, 64, 64, 400)
 
                     elif bg_mode == "In":
 
@@ -665,7 +668,10 @@ while run:
 
                         bg_mode = "Out"
 
-                        goblins.pop(goblins.index(goblin))
+                        if goblin.visible == True:
+                            goblin.visible = False
+
+                            goblins.pop(goblins.index(goblin))
 
     if Pause == False:
 
@@ -681,8 +687,6 @@ while run:
 
             player.currentWeapon = "Bow"
 
-
-    if Pause == False:
 
         for bullet in bullets:
 
@@ -713,10 +717,6 @@ while run:
                 pass
 
 
-
-
-    if Pause == False:
-
         if keys[pygame.K_v] or GPIO.input(buttons[8]) == True:  # Spawns Zombie - V key
 
             if len(goblins) < 1:
@@ -727,13 +727,11 @@ while run:
 
             if goblin.visible == False:
 
-                x = randint(50, 750)
-
                 goblins.pop(goblins.index(goblin))
 
-                spawn_range(x)
+                spawn_range(x_int)
 
-                goblin = Enemy(x, 340, 64, 64, 400)
+                goblin = Enemy(x_int, 340, 64, 64, 400)
 
         if keys[pygame.K_SPACE] and shootLoop == 0 or GPIO.input(buttons[5]) == True and shootLoop == 0: # Shoots projectile - Space Key
 
