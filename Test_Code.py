@@ -4,6 +4,8 @@ import pygame
 
 from random import randint
 
+import Input_6
+
 pygame.init()
 
 pygame.joystick.init()
@@ -499,6 +501,8 @@ def proj_cycle(proj, projs):
 player = Player(300, 335, 64, 64)
 
 goblin = Enemy(100, 340, 64, 64, 400)
+
+weapon = [0, 1, 2]
 
 bullets = []
 
