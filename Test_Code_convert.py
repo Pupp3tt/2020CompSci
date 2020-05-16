@@ -439,24 +439,34 @@ class Knife(Projectile):
 ##########################################################################
 
 class Materials(object):
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.visible = True
 
-    pass
+    def draw(self):
 
-class food(Materials):
+        if self.visible == True:
 
-    def __init__(self):
+            if player.health < 100 and player.hit_counter > 0:
 
-        Materials.__init__(self)
+                pygame.draw.rect(screen, (255, 0, 0), (int(self.x), int(self.y), 20, 20))
 
-    pass
+        else:
 
-class drinks(Materials):
+            pass
 
-    def __init__(self):
+    def heal(self):
 
-        Materials.__init__(self)
+        if player.health < 100:
 
-    pass
+            player.health += 10
+
+            player.hit_counter -= 1
+
+        else:
+
+            pass
 
 ##################################################################
 
@@ -475,6 +485,8 @@ def redrawGameWindow():
     screen.blit(text_wep, (14, 30))
 
     pygame.draw.rect(screen, BROWN, (door_x, door_y, 32, 64))
+
+    medpack.draw()
 
     if Pause == True:
 
@@ -584,6 +596,8 @@ def ReadChannel(channel):
 player = Player(300, 335, 64, 64)
 
 goblin = Enemy(100, 340, 64, 64)
+
+medpack = Materials(30, 380)
 
 weapon = [0, 1, 2]
 

@@ -233,35 +233,9 @@ class Materials(object):
     def __init__(self, x, y, m, health):
         self.x = x
         self.y = y
-        self.vel = 5
-        self.isJump = False
-        self.jumpCount = 10
-        self.left = True
-        self.right = False
-        self.walkCount = 0
-        self.standing = True
-        self.hitbox = (self.x + 17, self.y + 11, 29, 52)
-        self.dmg = 10
-        self.health = health
         self.hit_counter = 0
         self.visible = True
-        self.weapon_slot = 0
         self.m = m
-        print health
-
-        @property
-        def items(self):
-            return self._items
-        @items.setter
-        def items(self, value):
-            self._items = value
-        
-        @property
-        def foods(self):
-            return self._foods
-        @foods.setter
-        def foods(self, value):
-            self._foods = value
 
         def addFood(self, item):
             self._foods.append(item)
@@ -269,15 +243,9 @@ class Materials(object):
         def delFoods(self, item):
             self._foods.remove(item)
 
-    def hit(self):
-        global health
-        if self.health > 0:
-            self.health -= goblin.dmg
-            print self.health
-
     def draw(self, screen):
         #if the players health goes less than 60
-        if player.health <= 60:
+        if player.health < 100:
             x = 30
             #this draws the health box at this point
             pygame.draw.rect(screen, (255, 0, 0), (x, 380, 20, 20))
@@ -291,19 +259,6 @@ class Materials(object):
         #makes sure players health does not go over 100
         if player.health >= 100:
             player.health = 100
-        
-            
-            
-
-
-
-class drinks(Materials):
-    def __init__(self):
-        Materials.__init__(self)
-    pass
-
-
-
 ##################################################################
 
 
