@@ -6,10 +6,6 @@ from random import randint
 
 import spidev
 
-import os
-
-import time
-
 pygame.init()
 
 pygame.joystick.init()
@@ -55,6 +51,7 @@ GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
 
 buttons = [18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 17, 16, 13]
+          #0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12
 
 swt_channel = 0
 vrx_channel = 1
@@ -102,7 +99,6 @@ class Player(object):
         self.visible = True
 
         self.weapon_slot = 0
-
 
 
     def draw(self, screen):
@@ -243,7 +239,7 @@ class Enemy(object):
 
 
 
-    def __init__(self, x, y, width, height, end):
+    def __init__(self, x, y, width, height):
 
         self.x = x
 
@@ -252,8 +248,6 @@ class Enemy(object):
         self.width = width
 
         self.height = height
-
-        self.end = end
 
         self.walkCount = 0
 
@@ -274,6 +268,8 @@ class Enemy(object):
     def draw(self, screen):
 
         self.move()
+
+        self.fall()
 
         if self.visible:
 
@@ -306,29 +302,58 @@ class Enemy(object):
     def move(self):
 
         if Pause == False:
-            if self.vel > 0:
 
-                if self.x + self.vel < player.x + 20:
+            if self.y >= 340:
 
-                    self.x += self.vel
+                if self.vel > 0:
+
+                    if self.x + self.vel < player.x + 20:
+
+                        self.x += self.vel
+
+                    else:
+
+                        self.vel = self.vel * -1
+
+                        self.walkCount = 0
 
                 else:
 
-                    self.vel = self.vel * -1
+                    if self.x - self.vel > player.x - 20:
 
-                    self.walkCount = 0
+                        self.x += self.vel
+
+                    else:
+
+                        self.vel = self.vel * -1
+
+                        self.walkCount = 0
 
             else:
 
-                if self.x - self.vel > player.x - 20:
+                if self.vel > 0:
 
-                    self.x += self.vel
+                    if self.x + self.vel < 730:  # Less than
+
+                        self.x += self.vel
+
+                    else:
+
+                        self.vel = self.vel * -1
+
+                        self.walkCount = 0
 
                 else:
 
-                    self.vel = self.vel * -1
+                    if self.x - self.vel > 610:  # Greater than
 
-                    self.walkCount = 0
+                        self.x += self.vel
+
+                    else:
+
+                        self.vel = self.vel * -1
+
+                        self.walkCount = 0
 
 
 
@@ -341,6 +366,12 @@ class Enemy(object):
         else:
 
             self.visible = False
+
+    def fall(self):
+
+        if self.y < 340 and self.x in range(610, 730):
+
+            self.y += 20
 
 class Projectile(object):
 
@@ -405,19 +436,11 @@ class Knife(Projectile):
 
         pygame.draw.rect(screen, self.color, (int(self.x), int(self.y), int(self.width), int(self.height)))
 
-
-
 ##########################################################################
-
-
 
 class Materials(object):
 
     pass
-
-
-
-
 
 class food(Materials):
 
@@ -425,13 +448,7 @@ class food(Materials):
 
         Materials.__init__(self)
 
-
-
     pass
-
-
-
-
 
 class drinks(Materials):
 
@@ -439,15 +456,9 @@ class drinks(Materials):
 
         Materials.__init__(self)
 
-
-
     pass
 
-
-
 ##################################################################
-
-
 
 def redrawGameWindow():
 
@@ -495,19 +506,35 @@ def redrawGameWindow():
 
     pygame.display.update()
 
-def spawn_range(x):
+def spawn_range(val):
 
-    if (player.x - 50) <= x:
+    val = randint(50, 745)
 
-        x -= 50
+    if (player.x - 100) <= val:
 
-        return x
+        val -= 100
 
-    if (player.x + 50) >= x:
+        return val
 
-        x += 50
+    elif (player.x + 100) >= val:
 
-        return x
+        val += 100
+
+        return val
+
+    elif player.x >= 700:
+
+        val -= 100
+
+        return val
+
+    elif player.x < 100:
+
+        val += 100
+
+        return val
+
+    return val
 
 
 
@@ -556,7 +583,9 @@ def ReadChannel(channel):
 
 player = Player(300, 335, 64, 64)
 
-goblin = Enemy(100, 340, 64, 64, 400)
+goblin = Enemy(100, 340, 64, 64)
+
+weapon = [0, 1, 2]
 
 bullets = []
 
@@ -581,6 +610,10 @@ while run:
     clock.tick(27)
 
     x_int = randint(50, 745)
+
+    y_int = 340
+
+    spawn_range(x_int)
 
     keys = pygame.key.get_pressed()
 
@@ -631,59 +664,58 @@ while run:
 
             run = False
 
-        if event.type == pygame.KEYDOWN:
 
-            if event.key == pygame.K_ESCAPE: #Pause Game - Escape key
 
-                if Pause == False:
+    if keys[pygame.K_ESCAPE] or GPIO.input(buttons[10]): #Pause Game - Escape key
 
-                    Pause = True
+        if Pause == False:
 
-                    pygame.draw.rect(screen, (0, 0, 0), (100, 100, 100, 100))
+            Pause = True
 
-                elif Pause == True:
+            pygame.draw.rect(screen, (0, 0, 0), (100, 100, 100, 100))
 
-                    Pause = False
+        elif Pause == True:
 
-            if event.key == pygame.K_e: #Use on door to switch between house and outside - E key
+            Pause = False
 
-                if player.x in range(698, 762):
+    if keys[pygame.K_e] or GPIO.input(buttons[9]): #Use on door to switch between house and outside - E key
 
-                    if bg_mode == "Out":
+        if player.x in range(698, 762):
 
-                        bg = pygame.image.load('ArtWork/background_inside_house_1.png')
+            if bg_mode == "Out":
 
-                        bg_mode = "In"
+                bg = pygame.image.load('ArtWork/background_inside_house_1.png')
 
-                        if goblin.visible == True:
-                            goblins.pop(goblins.index(goblin))
+                bg_mode = "In"
 
-                            spawn_range(x_int)
+                y_int = -40
 
-                            goblin = Enemy(x_int, 340, 64, 64, 400)
+                if goblin.visible == True:
 
-                    elif bg_mode == "In":
+                   goblin.visible = False
 
-                        bg = pygame.image.load('ArtWork/background.png')
+            elif bg_mode == "In":
 
-                        bg_mode = "Out"
+                bg = pygame.image.load('ArtWork/background_right_house_test.png')
 
-                        if goblin.visible == True:
-                            goblin.visible = False
+                bg_mode = "Out"
 
-                            goblins.pop(goblins.index(goblin))
+                if goblin.visible == True:
+
+                    goblin.visible = False
+
 
     if Pause == False:
 
-        if keys[pygame.K_c]:  # Switch to Pistol - C key
+        if keys[pygame.K_c] or GPIO.input(buttons[11]):  # Switch to Pistol - C key
 
             player.currentWeapon = "Pistol"
 
-        if keys[pygame.K_b]:  # Switch to Knife - B key
+        if keys[pygame.K_b] or GPIO.input(buttons[12]):  # Switch to Knife - B key
 
             player.currentWeapon = "Knife"
 
-        if keys[pygame.K_n]:  # Switch to Knife - N key
+        if keys[pygame.K_n] or GPIO.input(buttons[1]):  # Switch to Knife - N key
 
             player.currentWeapon = "Bow"
 
@@ -717,21 +749,19 @@ while run:
                 pass
 
 
-        if keys[pygame.K_v] or GPIO.input(buttons[8]) == True:  # Spawns Zombie - V key
+        if len(goblins) < 1:
 
-            if len(goblins) < 1:
+            goblin.visible = True
 
-                goblin.visible = True
+            goblins.append(goblin)
 
-                goblins.append(goblin)
+        if goblin.visible == False:
 
-            if goblin.visible == False:
+            goblins.pop(goblins.index(goblin))
 
-                goblins.pop(goblins.index(goblin))
+            spawn_range(x_int)
 
-                spawn_range(x_int)
-
-                goblin = Enemy(x_int, 340, 64, 64, 400)
+            goblin = Enemy(x_int, y_int, 64, 64)
 
         if keys[pygame.K_SPACE] and shootLoop == 0 or GPIO.input(buttons[5]) == True and shootLoop == 0: # Shoots projectile - Space Key
 

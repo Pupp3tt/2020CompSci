@@ -1,10 +1,6 @@
-
-
 import pygame
 
 from random import randint
-
-import Input_6
 
 pygame.init()
 
@@ -75,8 +71,6 @@ class Player(object):
         self.visible = True
 
         self.weapon_slot = 0
-
-
 
 
     def draw(self, screen):
@@ -217,7 +211,7 @@ class Enemy(object):
 
 
 
-    def __init__(self, x, y, width, height, end):
+    def __init__(self, x, y, width, height):
 
         self.x = x
 
@@ -226,8 +220,6 @@ class Enemy(object):
         self.width = width
 
         self.height = height
-
-        self.end = end
 
         self.walkCount = 0
 
@@ -248,6 +240,8 @@ class Enemy(object):
     def draw(self, screen):
 
             self.move()
+
+            self.fall()
 
             if self.visible:
 
@@ -280,29 +274,58 @@ class Enemy(object):
     def move(self):
 
         if Pause == False:
-            if self.vel > 0:
 
-                if self.x + self.vel < player.x + 20:
+            if self.y >= 340:
 
-                    self.x += self.vel
+                if self.vel > 0:
+
+                    if self.x + self.vel < player.x + 20:
+
+                        self.x += self.vel
+
+                    else:
+
+                        self.vel = self.vel * -1
+
+                        self.walkCount = 0
 
                 else:
 
-                    self.vel = self.vel * -1
+                    if self.x - self.vel > player.x - 20:
 
-                    self.walkCount = 0
+                        self.x += self.vel
+
+                    else:
+
+                        self.vel = self.vel * -1
+
+                        self.walkCount = 0
 
             else:
 
-                if self.x - self.vel > player.x - 20:
+                if self.vel > 0:
 
-                    self.x += self.vel
+                    if self.x + self.vel < 730:  # Less than
+
+                        self.x += self.vel
+
+                    else:
+
+                        self.vel = self.vel * -1
+
+                        self.walkCount = 0
 
                 else:
 
-                    self.vel = self.vel * -1
+                    if self.x - self.vel > 610:  # Greater than
 
-                    self.walkCount = 0
+                        self.x += self.vel
+
+                    else:
+
+                        self.vel = self.vel * -1
+
+                        self.walkCount = 0
 
 
 
@@ -315,6 +338,12 @@ class Enemy(object):
         else:
 
             self.visible = False
+
+    def fall(self):
+
+        if self.y < 340 and self.x in range(610, 730):
+
+            self.y += 20
 
 class Projectile(object):
 
@@ -350,6 +379,7 @@ class Bullet(Projectile):
 
         pygame.draw.circle(screen, self.color, (int(self.x), int(self.y)), int(self.radius))
 
+
 class Arrow(Projectile):
 
     def __init__(self, x, y, radius, color, facing):
@@ -361,6 +391,7 @@ class Arrow(Projectile):
     def draw(self, screen):
 
         pygame.draw.rect(screen, self.color, (int(self.x), int(self.y), int(self.width), int(self.height)))
+
 
 class Knife(Projectile):
 
@@ -446,25 +477,42 @@ def redrawGameWindow():
 
     pygame.display.update()
 
-def spawn_range(x):
+def spawn_range(val):
 
-    if (player.x - 50) <= x:
+    val = randint(50, 745)
 
-        x -= 50
+    if (player.x - 100) <= val:
 
-        return x
+        val -= 100
 
-    if (player.x + 50) >= x:
+        return val
 
-        x += 50
+    elif (player.x + 100) >= val:
 
-        return x
+        val += 100
+
+        return val
+
+    elif player.x >= 700:
+
+        val -= 100
+
+        return val
+
+    elif player.x < 100:
+
+        val += 100
+
+        return val
+
+    return val
 
 
 
 def proj_cycle(proj, projs):
 
     if Pause == False:
+
         if goblin.visible == True:
 
             if proj.y - proj.radius < goblin.hitbox[1] + goblin.hitbox[3] and proj.y + proj.radius > goblin.hitbox[1]:
@@ -500,7 +548,7 @@ def proj_cycle(proj, projs):
 
 player = Player(300, 335, 64, 64)
 
-goblin = Enemy(100, 340, 64, 64, 400)
+goblin = Enemy(100, 340, 64, 64)
 
 weapon = [0, 1, 2]
 
@@ -529,6 +577,10 @@ while run:
     keys = pygame.key.get_pressed()
 
     x = randint(50, 745)
+
+    spawn_range(x)
+
+    y = 340
 
     if Pause == False:
         if goblin.visible == True:
@@ -597,26 +649,21 @@ while run:
 
                         bg_mode = "In"
 
+                        y = -40
+
                         if goblin.visible == True:
 
-                            goblins.pop(goblins.index(goblin))
-
-                            spawn_range(x)
-
-                            goblin = Enemy(x, 340, 64, 64, 400)
-
+                            goblin.visible = False
 
                     elif bg_mode == "In":
 
-                        bg = pygame.image.load('ArtWork/background.png')
+                        bg = pygame.image.load('ArtWork/background_right_house_test.png')
 
                         bg_mode = "Out"
 
                         if goblin.visible == True:
 
                             goblin.visible = False
-
-                            goblins.pop(goblins.index(goblin))
 
 
     if Pause == False:
@@ -631,6 +678,7 @@ while run:
         if keys[pygame.K_n]: # Switch to Knife - N key
 
             player.currentWeapon = "Bow"
+
 
         for bullet in bullets:
 
@@ -661,21 +709,19 @@ while run:
                 pass
 
 
-        if keys[pygame.K_v]:  # Spawns Zombie - V key
+        if len(goblins) < 1:
 
-            if len(goblins) < 1:
+            goblin.visible = True
 
-                goblin.visible = True
+            goblins.append(goblin)
 
-                goblins.append(goblin)
+        if goblin.visible == False:
 
-            if goblin.visible == False:
+            goblins.pop(goblins.index(goblin))
 
-                goblins.pop(goblins.index(goblin))
+            spawn_range(x)
 
-                spawn_range(x)
-
-                goblin = Enemy(x, 340, 64, 64, 400)
+            goblin = Enemy(x, y, 64, 64, 400)
 
         if keys[pygame.K_SPACE] and shootLoop == 0: # Shoots projectile - Space Key
 
