@@ -721,7 +721,7 @@ while run:
 
             spawn_range(x)
 
-            goblin = Enemy(x, y, 64, 64, 400)
+            goblin = Enemy(x, y, 64, 64)
 
         if keys[pygame.K_SPACE] and shootLoop == 0: # Shoots projectile - Space Key
 
