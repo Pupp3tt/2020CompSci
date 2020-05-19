@@ -652,6 +652,9 @@ while run:
 
                         cooldown -= 1
 
+        if player.x in range(5, 50):
+            medpack.heal()
+
 
 
     if shootLoop > 0:
